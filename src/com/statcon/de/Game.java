@@ -1,13 +1,17 @@
 package com.statcon.de;
 
+import java.awt.AlphaComposite;
+import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.LinkedList;
+import java.awt.geom.RoundRectangle2D;
 import java.util.Random;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.swing.ImageIcon;
 import javax.swing.JPanel;
@@ -18,12 +22,13 @@ import com.statcon.de.util.Settings;
 /*
  * 
  * TODOS:
- * - Bug mit Liste beseitigen
+ *
  * - Einschussöcher beim Schießen
  * - Vernünftige Bewegung der Zielscheiben
  * - Musik + Soundeffekte
  * - Menü: Geschlecht wählen, Namen eingeben, Start-Knopf
  * - Highscore: Liste mit den Top x anzeigen
+ * - Mundition: Nachladen nach 6 Schüssen mit Rechtsklick
  * 
  */
 
@@ -40,8 +45,10 @@ import com.statcon.de.util.Settings;
 public class Game extends JPanel{
 
 	
+	private int bullets = 6; // Wie viel mundition hat man noch?
 	private int kills = 0; // Wie viele Kills
 	private int streak = 0; // Wie viele Kills am Stück
+	private int score = 0; // Punkte in diesem Spiel
 	private String name = Settings.DEFAULT_PLAYER_NAME; // Name des Spielers für den Highscore
 	private long roundStart = 0; // Zeitpunkt an dem eine Spielrunde startet
 	private long paintStamp; // Zeitzähler um die anzahl der Frames / Sekunde zu kontrollieren
@@ -49,8 +56,8 @@ public class Game extends JPanel{
 	private enum state {menu, game, highscore};
 	public state gameState = state.menu;
 
-	LinkedList <Destructable> objs = new LinkedList<Destructable>(); // aktuell vorhandene Ziele
-	static LinkedList <Destructable> removeObjs = new LinkedList<Destructable>(); // zu entfernende Ziele
+	CopyOnWriteArrayList <Destructable> objs = new CopyOnWriteArrayList<Destructable>(); // aktuell vorhandene Ziele
+	static CopyOnWriteArrayList <Destructable> removeObjs = new CopyOnWriteArrayList<Destructable>(); // zu entfernende Ziele
 	
 	/**
 	 * Zeichnen des Bildschirms in Abhängigkeit des gameStates.
@@ -62,10 +69,6 @@ public class Game extends JPanel{
 		
 		if(gameState == state.game) {
 			repaint();
-			for(Destructable i:removeObjs) { // Abgeballerte Ziele entfernen. Bzw. Ziele, die schon zu lange ungetroffen umherirren.
-				objs.remove(i);
-			}
-			removeObjs.clear();
 		} else if(gameState == state.menu) {
 		} else {
 			// Im Moment: Spiel verlassen wenn die Runde vorbei ist
@@ -79,10 +82,26 @@ public class Game extends JPanel{
 	 * @param p - die Position des "Cursors" im Moment als der Button gedrückt wird.
 	 */
 	synchronized void hit(Point p) {
+		if(bullets >= 1) {
+		bullets--;
+		boolean anyHit = false;
 		for(Destructable i:objs) {
 			if(i.hit(p)) { // Wenn ein existierendes Objekt getroffen wurde
-				kills++;
+				anyHit = true;
 			}
+		}
+		if(anyHit) { // Treffer
+			
+			// Treffersound
+			kills++;
+			streak++;
+			score = score + 10*streak*streak;
+		} else { // Fehlschuss
+			// Fehlschuss sound
+			streak = 0;
+		}
+		} else { // keine Ammo mehr
+			// no-ammo-sound abspielen
 		}
 	};
 	
@@ -94,7 +113,11 @@ public class Game extends JPanel{
 		if(System.currentTimeMillis() - roundStart >= Settings.ROUND_TIME_MS) { // Runde beenden, wenn die Spielzeit rum ist
 			nextGameState(); // Highscore anzeigen
 		} else { // ggf. neue Ziele erzeugen
-			populate();	
+			populate();
+			for(Destructable i:removeObjs) { // Abgeballerte Ziele entfernen. Bzw. Ziele, die schon zu lange ungetroffen umherirren.
+				objs.remove(i);
+			}
+			removeObjs.clear();
 		}} else {
 		}
 	};
@@ -111,10 +134,14 @@ public class Game extends JPanel{
 //		log.info("Gamestat auf game setzen.");
 		nextGameState();
 
-		this.addMouseListener(new MouseAdapter() { 
-		    public void mousePressed(MouseEvent me) { 
-		    	hit(me.getLocationOnScreen());
-		    } 
+		this.addMouseListener(new MouseAdapter() { // Mausklicks registrieren
+			public void mousePressed(MouseEvent e) {
+				if(e.getButton() == MouseEvent.BUTTON1) { // Linksklick
+					hit(e.getPoint());
+				} else if(e.getButton() == MouseEvent.BUTTON3) { // Rechtsklick
+				  	bullets = 6;
+				}
+			};
 		}); 
 
 		paintStamp = System.currentTimeMillis();
@@ -157,6 +184,7 @@ public class Game extends JPanel{
 			roundStart = System.currentTimeMillis(); //Zeitpunkt, wann die Runde beginnt
 		} else if(gameState == state.game){
 			gameState = state.highscore;
+			System.out.println("You got: " + score + " points!");
 		} else {
 			gameState = state.menu;
 		}
@@ -184,13 +212,35 @@ public class Game extends JPanel{
 	 */
 	public void paint(Graphics g) {
 		Graphics2D g2d = (Graphics2D) g;
-
+		// Hintergrund
 		Image background = new ImageIcon(this.getClass().getResource("/images/background_01.png")).getImage();
 		g.drawImage(background, 0, 0, null);
-		
+
+		g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f)); // Ziele nicht mehr transparent
+		// Bullets
+		g2d.setPaint(Color.white);
+		for(int i = 1; i <= 6; i++) {
+			if(i > bullets) {
+				g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.1f)); // Transparent
+			}
+			g2d.fill(new RoundRectangle2D.Double(Settings.SCREEN_SIZE.getWidth() - i*45, 60 , 30, 60, 10, 10));
+			g2d.fillArc((int)Settings.SCREEN_SIZE.getWidth() - i*45, 30, 30, 50, 0,180);
+		}
+
+		// Score
+	    g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f)); // Ziele nicht mehr transparent
+		g.setFont(new Font("Arial Black", Font.BOLD, 30));
+	    g.setColor(Color.white);
+	    g.drawString("Score: " + score, 20 , 40);
+
+	    g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f)); // Ziele nicht mehr transparent
+
+	    
+		// Ziele
 		for(Destructable i:objs) {
 			i.render(g2d);
 		}
+
 	}
 	
 }

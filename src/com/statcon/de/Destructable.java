@@ -71,6 +71,7 @@ public class Destructable {
 	public void render(Graphics2D g){
 		if(currImg == -1) {
 			g.drawImage(img, hitbox.x, hitbox.y, null);
+//			g.drawRect(hitbox.x, hitbox.y, hitbox.width, hitbox.height);
 		} 
 		if(currImg != -1 && System.currentTimeMillis() - timeStamp > 1) {
 			timeStamp = System.currentTimeMillis();
