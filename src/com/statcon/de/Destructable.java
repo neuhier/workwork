@@ -72,14 +72,14 @@ public class Destructable {
 		if(currImg == -1) {
 			g.drawImage(img, hitbox.x, hitbox.y, null);
 		} 
-		if(currImg != -1 && System.currentTimeMillis() - timeStamp > 100) {
+		if(currImg != -1 && System.currentTimeMillis() - timeStamp > 1) {
+			timeStamp = System.currentTimeMillis();
 			if(currImg == deathAnimation.length) {
 				Game.removeObj(this);
 			} else {
 				g.drawImage(deathAnimation[currImg], hitbox.x, hitbox.y, null);				
+				currImg++;
 			}
-			currImg++;
-			timeStamp = System.currentTimeMillis();
 		}
 	};
 	

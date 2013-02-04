@@ -14,6 +14,20 @@ import javax.swing.JPanel;
 
 import com.statcon.de.util.Settings;
 
+
+/*
+ * 
+ * TODOS:
+ * - Bug mit Liste beseitigen
+ * - Einschussöcher beim Schießen
+ * - Vernünftige Bewegung der Zielscheiben
+ * - Musik + Soundeffekte
+ * - Menü: Geschlecht wählen, Namen eingeben, Start-Knopf
+ * - Highscore: Liste mit den Top x anzeigen
+ * 
+ */
+
+
 /**
  * Diese Klasse repräsentiert ein Spiel. Das Spiel kann in verschiedenen Zuständen sein:
  * <li> Menu: Das Hauptmenü enthält die Möglichkeit einen Namen einzugeben sowie das Spiel zu starten.</li>
@@ -30,7 +44,7 @@ public class Game extends JPanel{
 	private int streak = 0; // Wie viele Kills am Stück
 	private String name = Settings.DEFAULT_PLAYER_NAME; // Name des Spielers für den Highscore
 	private long roundStart = 0; // Zeitpunkt an dem eine Spielrunde startet
-	private long renderStamp; // Zeitzähler um die anzahl der Frames / Sekunde zu kontrollieren
+	private long paintStamp; // Zeitzähler um die anzahl der Frames / Sekunde zu kontrollieren
 	
 	private enum state {menu, game, highscore};
 	public state gameState = state.menu;
@@ -47,8 +61,6 @@ public class Game extends JPanel{
 	synchronized void render() {
 		
 		if(gameState == state.game) {
-			for(Destructable i:objs) {
-			}
 			repaint();
 			for(Destructable i:removeObjs) { // Abgeballerte Ziele entfernen. Bzw. Ziele, die schon zu lange ungetroffen umherirren.
 				objs.remove(i);
@@ -91,14 +103,13 @@ public class Game extends JPanel{
 	 * Spiel starten.
 	 */
 	public void initializate() {
-//		log.info("Spiel initialisieren");
 //		log.info("Mit Wiimote verbinden");
 //		log.info("Name auf <player> setzen, Punkte auf 0, streak auf 0");
 //		log.info("Menü zeichnen");
-		// Hier eigentlich auf Mausklick reagiert:	
-//			log.info("Start geklickt!");
-//			log.info("Gamestat auf game setzen.");
-			nextGameState();
+// Hier eigentlich auf Mausklick reagiert:	
+//		log.info("Start geklickt!");
+//		log.info("Gamestat auf game setzen.");
+		nextGameState();
 
 		this.addMouseListener(new MouseAdapter() { 
 		    public void mousePressed(MouseEvent me) { 
@@ -106,14 +117,14 @@ public class Game extends JPanel{
 		    } 
 		}); 
 
-		renderStamp = System.currentTimeMillis();
+		paintStamp = System.currentTimeMillis();
 		while(true){
-			if(System.currentTimeMillis() - renderStamp > 1) { // nur alle so und so viel sekunden rendern
-				renderStamp = System.currentTimeMillis();
+			render();
+			if(System.currentTimeMillis() - paintStamp > 1) { // nur alle so und so viel sekunden rendern
 				moveObjects();
-				render();
 			}
 			checkStatus();
+			paintStamp = System.currentTimeMillis();
 		}
 	};
 	
