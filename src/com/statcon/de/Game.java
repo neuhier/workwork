@@ -17,6 +17,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 
 import com.statcon.de.util.Settings;
+import com.statcon.de.util.SoundEffectPlayer;
 
 
 /*
@@ -76,6 +77,42 @@ public class Game extends JPanel{
 		}
 	};
 	
+
+	/**
+	 * Spiel starten.
+	 */
+	public void initializate() {
+//		log.info("Mit Wiimote verbinden");
+//		log.info("Name auf <player> setzen, Punkte auf 0, streak auf 0");
+//		log.info("Menü zeichnen");
+// Hier eigentlich auf Mausklick reagiert:	
+//		log.info("Start geklickt!");
+//		log.info("Gamestat auf game setzen.");
+		nextGameState();
+
+		this.addMouseListener(new MouseAdapter() { // Mausklicks registrieren
+			public void mousePressed(MouseEvent e) {
+				if(e.getButton() == MouseEvent.BUTTON1) { // Linksklick
+					hit(e.getPoint());
+				} else if(e.getButton() == MouseEvent.BUTTON3) { // Rechtsklick
+					SoundEffectPlayer.reloadSound();
+					bullets = 6;
+				}
+			};
+		}); 
+
+		paintStamp = System.currentTimeMillis();
+		while(true){
+			render();
+			if(System.currentTimeMillis() - paintStamp > 1) { // nur alle so und so viel sekunden rendern
+				moveObjects();
+			}
+			checkStatus();
+			paintStamp = System.currentTimeMillis();
+		}
+	};
+	
+	
 	/**
 	 * Wird ausgelöst, immer wenn ein Button auf dem Wiimote gedrückt wird.
 	 * 
@@ -91,13 +128,12 @@ public class Game extends JPanel{
 			}
 		}
 		if(anyHit) { // Treffer
-			
-			// Treffersound
+			SoundEffectPlayer.hitSound();
 			kills++;
 			streak++;
 			score = score + 10*streak*streak;
 		} else { // Fehlschuss
-			// Fehlschuss sound
+			SoundEffectPlayer.failSound();
 			streak = 0;
 		}
 		} else { // keine Ammo mehr
@@ -119,39 +155,6 @@ public class Game extends JPanel{
 			}
 			removeObjs.clear();
 		}} else {
-		}
-	};
-	
-	/**
-	 * Spiel starten.
-	 */
-	public void initializate() {
-//		log.info("Mit Wiimote verbinden");
-//		log.info("Name auf <player> setzen, Punkte auf 0, streak auf 0");
-//		log.info("Menü zeichnen");
-// Hier eigentlich auf Mausklick reagiert:	
-//		log.info("Start geklickt!");
-//		log.info("Gamestat auf game setzen.");
-		nextGameState();
-
-		this.addMouseListener(new MouseAdapter() { // Mausklicks registrieren
-			public void mousePressed(MouseEvent e) {
-				if(e.getButton() == MouseEvent.BUTTON1) { // Linksklick
-					hit(e.getPoint());
-				} else if(e.getButton() == MouseEvent.BUTTON3) { // Rechtsklick
-				  	bullets = 6;
-				}
-			};
-		}); 
-
-		paintStamp = System.currentTimeMillis();
-		while(true){
-			render();
-			if(System.currentTimeMillis() - paintStamp > 1) { // nur alle so und so viel sekunden rendern
-				moveObjects();
-			}
-			checkStatus();
-			paintStamp = System.currentTimeMillis();
 		}
 	};
 	

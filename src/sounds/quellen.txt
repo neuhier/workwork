@@ -1,0 +1,4 @@
+Sounds: Quellen
+hit.wav - http://www.freesound.org/people/Shades/sounds/37236/
+fail.wav - http://freesound.org/people/CGEffex/sounds/96633/
+reload1 und reload.wav - http://freesound.org/people/beerbelly38/sounds/162149/
