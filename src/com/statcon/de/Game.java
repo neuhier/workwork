@@ -1,8 +1,15 @@
 package com.statcon.de;
 
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.Point;
 import java.util.LinkedList;
+import java.util.Random;
 import java.util.logging.Logger;
+
+import javax.swing.ImageIcon;
+import javax.swing.JPanel;
 
 import com.statcon.de.util.Settings;
 
@@ -15,18 +22,18 @@ import com.statcon.de.util.Settings;
  * @author Basti Hoffmeister
  *
  */
-public class Game {
+public class Game extends JPanel {
 
 	private static final Logger log = Logger.getLogger(Game.class.getName());
 			
-	private enum state {menu, game, highscore};
-
-	public state gameState = state.menu;
-	
 	private int kills = 0; // Wie viele Kills
 	private int streak = 0; // Wie viele Kills am Stück
 	private String name = Settings.DEFAULT_PLAYER_NAME; // Name des Spielers für den Highscore
 	private long roundStart = 0; // Zeitpunkt an dem eine Spielrunde startet
+	
+	private enum state {menu, game, highscore};
+	public state gameState = state.menu;
+
 	LinkedList <Destructable> objs = new LinkedList<Destructable>(); // aktuell vorhandene Ziele
 	LinkedList <Destructable> removeObjs = new LinkedList<Destructable>(); // zu entfernende Ziele
 	
@@ -37,12 +44,13 @@ public class Game {
 	 * <li> Background + Highscore Liste im gameState "highscore"</li>
 	 */
 	synchronized void render() {
-		log.info("Render Background");
+		
 		if(gameState == state.game) {
 			log.info("Render Game");
 			for(Destructable i:objs) {
-				i.render();
+//				i.render();
 			}
+			repaint();
 			for(Destructable i:removeObjs) { // Abgeballerte Ziele entfernen. Bzw. Ziele, die schon zu lange ungetroffen umherirren.
 				objs.remove(i);
 			}
@@ -55,7 +63,20 @@ public class Game {
 		}
 	};
 	
-	synchronized void hit(Point p) {};
+	/**
+	 * Wird ausgelöst, immer wenn ein Button auf dem Wiimote gedrückt wird.
+	 * 
+	 * @param p - die Position des "Cursors" im Moment als der Button gedrückt wird.
+	 */
+	synchronized void hit(Point p) {
+		for(Destructable i:objs) {
+			if(i.hit(p)) { // Wenn ein existierendes Objekt getroffen wurde
+				kills++;
+				removeObj(i);
+				log.info("Objekt getroffen.");
+			}
+		}
+	};
 	
 	/**
 	 * Diese Methode überprüft ob die Spielrunde um ist. Ausserdem fügt sie gegebenenfalls neue Ziele zur obj-Liste hinzu.
@@ -65,7 +86,7 @@ public class Game {
 		if(System.currentTimeMillis() - roundStart >= Settings.ROUND_TIME_MS) { // Runde beenden, wenn die Spielzeit rum ist
 			nextGameState(); // Highscore anzeigen
 		} else { // ggf. neue Ziele erzeugen
-			log.info("Populate targets");
+			populate();	
 			log.info("Entfernen von <alten> Zielen");
 		}} else {
 		}
@@ -85,8 +106,9 @@ public class Game {
 			log.info("Gamestat auf game setzen.");
 			nextGameState();
 		while(true){
-			checkStatus();
+			moveObjects();
 			render();
+			checkStatus();
 		}
 	};
 	
@@ -126,6 +148,36 @@ public class Game {
 			log.info("Nach dem Highscore wieder ins Menü!");
 		}
 		
+	}
+	
+	/**
+	 *  Je geringer die Anzahl der Ziele, desto höher die Wkt. ein neues hinzuzufügen.
+	 */
+	private void populate() {
+		Random gen = new Random();
+		switch(objs.size()) {
+		case 0: objs.add(new Destructable());
+		case 1: if(gen.nextInt(6) == 0) {objs.add(new Destructable());};
+		case 2: if(gen.nextInt(5) == 0) {objs.add(new Destructable());};
+		case 3: if(gen.nextInt(4) == 0) {objs.add(new Destructable());};
+		case 4: if(gen.nextInt(3) == 0) {objs.add(new Destructable());};
+		case 5: if(gen.nextInt(2) == 0) {objs.add(new Destructable());};
+		default:;
+		}
+	}
+	
+	/**
+	 * Paint-Methode für die Spiel Klasse
+	 */
+	public void paint(Graphics g) {
+		Graphics2D g2d = (Graphics2D) g;
+
+		Image background = new ImageIcon(this.getClass().getResource("/images/background_01.png")).getImage();
+		g.drawImage(background, 0, 0, null);
+		
+		for(Destructable i:objs) {
+			i.render(g2d);
+		}
 	}
 	
 }
