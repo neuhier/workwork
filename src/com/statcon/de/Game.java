@@ -4,9 +4,10 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Point;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.LinkedList;
 import java.util.Random;
-import java.util.logging.Logger;
 
 import javax.swing.ImageIcon;
 import javax.swing.JPanel;
@@ -22,20 +23,20 @@ import com.statcon.de.util.Settings;
  * @author Basti Hoffmeister
  *
  */
-public class Game extends JPanel {
+public class Game extends JPanel{
 
-	private static final Logger log = Logger.getLogger(Game.class.getName());
-			
+	
 	private int kills = 0; // Wie viele Kills
 	private int streak = 0; // Wie viele Kills am Stück
 	private String name = Settings.DEFAULT_PLAYER_NAME; // Name des Spielers für den Highscore
 	private long roundStart = 0; // Zeitpunkt an dem eine Spielrunde startet
+	private long renderStamp; // Zeitzähler um die anzahl der Frames / Sekunde zu kontrollieren
 	
 	private enum state {menu, game, highscore};
 	public state gameState = state.menu;
 
 	LinkedList <Destructable> objs = new LinkedList<Destructable>(); // aktuell vorhandene Ziele
-	LinkedList <Destructable> removeObjs = new LinkedList<Destructable>(); // zu entfernende Ziele
+	static LinkedList <Destructable> removeObjs = new LinkedList<Destructable>(); // zu entfernende Ziele
 	
 	/**
 	 * Zeichnen des Bildschirms in Abhängigkeit des gameStates.
@@ -46,9 +47,7 @@ public class Game extends JPanel {
 	synchronized void render() {
 		
 		if(gameState == state.game) {
-			log.info("Render Game");
 			for(Destructable i:objs) {
-//				i.render();
 			}
 			repaint();
 			for(Destructable i:removeObjs) { // Abgeballerte Ziele entfernen. Bzw. Ziele, die schon zu lange ungetroffen umherirren.
@@ -56,10 +55,9 @@ public class Game extends JPanel {
 			}
 			removeObjs.clear();
 		} else if(gameState == state.menu) {
-			log.info("Render Menu");
 		} else {
-			log.info("Render Highscore");
-			System.exit(0); // Logoutput überschaubar halten.
+			// Im Moment: Spiel verlassen wenn die Runde vorbei ist
+			System.exit(0);
 		}
 	};
 	
@@ -72,8 +70,6 @@ public class Game extends JPanel {
 		for(Destructable i:objs) {
 			if(i.hit(p)) { // Wenn ein existierendes Objekt getroffen wurde
 				kills++;
-				removeObj(i);
-				log.info("Objekt getroffen.");
 			}
 		}
 	};
@@ -87,7 +83,6 @@ public class Game extends JPanel {
 			nextGameState(); // Highscore anzeigen
 		} else { // ggf. neue Ziele erzeugen
 			populate();	
-			log.info("Entfernen von <alten> Zielen");
 		}} else {
 		}
 	};
@@ -96,18 +91,28 @@ public class Game extends JPanel {
 	 * Spiel starten.
 	 */
 	public void initializate() {
-		log.info("Spiel initialisieren");
-		log.info("Mit Wiimote verbinden");
-		log.info("Name auf <player> setzen, Punkte auf 0, streak auf 0");
-		log.info("Hintergrund malen");
-		log.info("Menü zeichnen");
+//		log.info("Spiel initialisieren");
+//		log.info("Mit Wiimote verbinden");
+//		log.info("Name auf <player> setzen, Punkte auf 0, streak auf 0");
+//		log.info("Menü zeichnen");
 		// Hier eigentlich auf Mausklick reagiert:	
-			log.info("Start geklickt!");
-			log.info("Gamestat auf game setzen.");
+//			log.info("Start geklickt!");
+//			log.info("Gamestat auf game setzen.");
 			nextGameState();
+
+		this.addMouseListener(new MouseAdapter() { 
+		    public void mousePressed(MouseEvent me) { 
+		    	hit(me.getLocationOnScreen());
+		    } 
+		}); 
+
+		renderStamp = System.currentTimeMillis();
 		while(true){
-			moveObjects();
-			render();
+			if(System.currentTimeMillis() - renderStamp > 1) { // nur alle so und so viel sekunden rendern
+				renderStamp = System.currentTimeMillis();
+				moveObjects();
+				render();
+			}
 			checkStatus();
 		}
 	};
@@ -126,7 +131,7 @@ public class Game extends JPanel {
 	 * 
 	 * @param destructable
 	 */
-	public void removeObj(Destructable destructable){
+	public static void removeObj(Destructable destructable){
 		removeObjs.add(destructable);
 	};
 
@@ -138,14 +143,11 @@ public class Game extends JPanel {
 	private void nextGameState() {
 		if(gameState == state.menu) {
 			gameState = state.game;
-			log.info("Runde beginnt!");
 			roundStart = System.currentTimeMillis(); //Zeitpunkt, wann die Runde beginnt
 		} else if(gameState == state.game){
 			gameState = state.highscore;
-			log.info("Runde ist vorbei!");
 		} else {
 			gameState = state.menu;
-			log.info("Nach dem Highscore wieder ins Menü!");
 		}
 		
 	}

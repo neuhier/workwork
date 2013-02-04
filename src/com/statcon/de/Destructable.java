@@ -5,7 +5,6 @@ import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.awt.image.BufferedImage;
 import java.util.Random;
 import java.util.logging.Logger;
 
@@ -25,8 +24,8 @@ public class Destructable {
 	
 	private long timeStamp;
 	private Rectangle hitbox;
-	private BufferedImage img;
-	private BufferedImage[] deathAnimation;
+	private Image img;
+	private Image[] deathAnimation;
 	private int currImg = -1;
 	
 	private Random gen = new Random(); // Zum Generieren von Zufallszahlen fŸr Grš§e des Ziels und seine Bewegung.
@@ -42,14 +41,27 @@ public class Destructable {
 		
 		Dimension screenSize = Settings.SCREEN_SIZE;
 		Point location = new Point(gen.nextInt(screenSize.width), gen.nextInt(screenSize.height)); // Wo erscheint das neue Ziel?
-
+		
+		deathAnimation = new Image[3];
+		
 		if(size==0) { // kleines Ziel
 			hitbox = new Rectangle(location, Settings.SMALL_TARGET);
-			//@TODO: Zuweisen des entsprechenden Bildes
+			img = new ImageIcon(this.getClass().getResource("/images/target_small.png")).getImage();
+			deathAnimation[0] = new ImageIcon(this.getClass().getResource("/images/target_small_death1.png")).getImage();
+			deathAnimation[1] = new ImageIcon(this.getClass().getResource("/images/target_small_death2.png")).getImage();
+			deathAnimation[2] = new ImageIcon(this.getClass().getResource("/images/target_small_death3.png")).getImage();
 		} else if (size == 1 || size == 2) { // mittleres Ziel
 			hitbox = new Rectangle(location, Settings.MEDIUM_TARGET);
+			img = new ImageIcon(this.getClass().getResource("/images/target_medium.png")).getImage();
+			deathAnimation[0] = new ImageIcon(this.getClass().getResource("/images/target_medium_death1.png")).getImage();
+			deathAnimation[1] = new ImageIcon(this.getClass().getResource("/images/target_medium_death2.png")).getImage();
+			deathAnimation[2] = new ImageIcon(this.getClass().getResource("/images/target_medium_death3.png")).getImage();
 		} else { // gro§es Ziel
 			hitbox = new Rectangle(location, Settings.BIG_TARGET);
+			img = new ImageIcon(this.getClass().getResource("/images/target_big.png")).getImage();
+			deathAnimation[0] = new ImageIcon(this.getClass().getResource("/images/target_big_death1.png")).getImage();
+			deathAnimation[1] = new ImageIcon(this.getClass().getResource("/images/target_big_death2.png")).getImage();
+			deathAnimation[2] = new ImageIcon(this.getClass().getResource("/images/target_big_death3.png")).getImage();
 		}
 	}
 	
@@ -57,9 +69,18 @@ public class Destructable {
 	 * Zeichnen des Ziels auf dem Bildschirm
 	 */
 	public void render(Graphics2D g){
-		Image target = new ImageIcon(this.getClass().getResource("/images/target_small.png")).getImage();
-		g.drawImage(target, hitbox.x, hitbox.y, null);
-		log.info("Objekt gezeichnet!");
+		if(currImg == -1) {
+			g.drawImage(img, hitbox.x, hitbox.y, null);
+		} 
+		if(currImg != -1 && System.currentTimeMillis() - timeStamp > 100) {
+			if(currImg == deathAnimation.length) {
+				Game.removeObj(this);
+			} else {
+				g.drawImage(deathAnimation[currImg], hitbox.x, hitbox.y, null);				
+			}
+			currImg++;
+			timeStamp = System.currentTimeMillis();
+		}
 	};
 	
 	/**
@@ -82,7 +103,7 @@ public class Destructable {
 			newY = newY + gen.nextInt(3)-1; // Entweder nichts, hoch oder runter (1px).
 		}
 		hitbox.setLocation(newX, newY);
-		log.info("Objekt bewegt");
+	//	log.info("Objekt bewegt");
 	};
 	
 	/**
@@ -92,6 +113,7 @@ public class Destructable {
 	 */
 	public boolean hit(Point p) {
 		if(hitbox.contains(p)){
+			currImg = 0;
 			return true;
 		}
 		return false;
