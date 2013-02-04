@@ -3,6 +3,7 @@ package com.statcon.de;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
+import java.util.logging.Logger;
 
 /**
  * Diese Klasse repräsentiert ein Ziel im Spiel.
@@ -12,7 +13,9 @@ import java.awt.image.BufferedImage;
  */
 public class Destructable {
 
-//	private Timestamp lastStamp; Wofür?
+	private static final Logger log = Logger.getLogger(Destructable.class.getName());
+	
+	private int timeStamp;
 	private Rectangle hitbox;
 	private BufferedImage img;
 	private BufferedImage[] deathAnimation;
@@ -21,12 +24,16 @@ public class Destructable {
 	/**
 	 * Zeichnen des Ziels auf dem Bildschirm
 	 */
-	public void render(){};
+	public void render(){
+		log.info("Objekt gezeichnet!");
+	};
 	
 	/**
 	 * Bewegen des Ziels
 	 */
-	public void move(){};
+	public void move(){
+		log.info("Objekt bewegt");
+	};
 	
 	/**
 	 * Überprüft ob ein Schuss diese Ziel getroffen hat.
