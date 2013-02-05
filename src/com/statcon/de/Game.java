@@ -72,6 +72,9 @@ public class Game extends JPanel {
 		menu, game, highscore
 	};
 
+
+	Image background = new ImageIcon(this.getClass().getResource("/images/background_01.png")).getImage();
+	
 	public state gameState = state.menu;
 
 	CopyOnWriteArrayList<Destructable> objs = new CopyOnWriteArrayList<Destructable>(); // aktuell
@@ -89,7 +92,7 @@ public class Game extends JPanel {
 	synchronized void render() {
 		repaint();
 	};
-
+	
 	/**
 	 * Spiel starten.
 	 */
@@ -226,9 +229,8 @@ public class Game extends JPanel {
 	 */
 	private void nextGameState() {
 		if (gameState == state.menu) {
+			roundStart = System.currentTimeMillis(); // Zeitpunkt, wann die Runde beginnt
 			gameState = state.game;
-			roundStart = System.currentTimeMillis(); // Zeitpunkt, wann die
-														// Runde beginnt
 		} else if (gameState == state.game) {
 			results.add(new GameResult(name, gender, score)); // Neues Ergebniss in die Liste eintragen.
 			Collections.sort(results, new Comparator<GameResult>(){ // Sortieren
@@ -297,10 +299,9 @@ public class Game extends JPanel {
 		
 		Graphics2D g2d = (Graphics2D) g;
 		
-		Image background = new ImageIcon(this.getClass().getResource( // Hintergrund wird immer gezeichnet
-				"/images/background_01.png")).getImage();
+		// Hintergrund immer malen
 		g2d.drawImage(background, 0, 0, (int)screenRes.getWidth(), (int)screenRes.getHeight(), null); 
-//TODO: Hintergrund in verschiedenen auflösungen zur Verfügung stellen
+		//TODO: Hintergrund in verschiedenen auflösungen zur Verfügung stellen
 		
 		if (gameState == state.game) { // Spiel-Modus
 		
