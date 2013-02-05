@@ -1,11 +1,13 @@
 package com.statcon.de.menu;
 
+import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Font;
-import java.awt.Graphics2D;
+import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.geom.RoundRectangle2D;
 
 public class MenuButton {
 
@@ -34,7 +36,7 @@ public class MenuButton {
 	/**
 	 * Button zeichnen.
 	 */
-	public void render(Graphics2D g) {
+	public void render(Graphics g) {
 		if(img == null) { // Text-Buttons
 			g.setColor(Color.white);
 			g.fillRoundRect(hitbox.x, hitbox.y, hitbox.width, hitbox.height, 10, 10);

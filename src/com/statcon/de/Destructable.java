@@ -35,11 +35,10 @@ public class Destructable {
 	 * 
 	 * Erstellt ein neues Ziel. Diese Ziel hat eine zufällige Größe (klein, mittel, groß).
 	 */
-	public Destructable() {
+	public Destructable(Dimension screenSize) {
 		timeStamp = System.currentTimeMillis(); // Geburtszeit des Ziels
 		int size = gen.nextInt(6); // Welche Größe hat das neue Ziel?
 		
-		Dimension screenSize = Settings.SCREEN_SIZE;
 		Point location = new Point(gen.nextInt(screenSize.width), gen.nextInt(screenSize.height)); // Wo erscheint das neue Ziel?
 		
 		deathAnimation = new Image[3];
@@ -92,17 +91,17 @@ public class Destructable {
 		int newX = hitbox.x;
 		int newY = hitbox.y;
 		
-		if(newX == Settings.SCREEN_SIZE.width) {
+/*		if(newX == Settings.SCREEN_SIZE.width) {
 			newX--;
 		} else {
-			newX = newX + gen.nextInt(3)-1; // Entweder nichts tun, oder einen pixel nach links oder rechts
-		}
+		*/	newX = newX + gen.nextInt(3)-1; // Entweder nichts tun, oder einen pixel nach links oder rechts
+		//}
 		
-		if(newY == Settings.SCREEN_SIZE.height) {
+	/*	if(newY == Settings.SCREEN_SIZE.height) {
 			newY--;
 		} else {
-			newY = newY + gen.nextInt(3)-1; // Entweder nichts, hoch oder runter (1px).
-		}
+		*/	newY = newY + gen.nextInt(3)-1; // Entweder nichts, hoch oder runter (1px).
+		//}
 		hitbox.setLocation(newX, newY);
 	//	log.info("Objekt bewegt");
 	};

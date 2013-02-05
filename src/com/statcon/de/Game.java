@@ -2,13 +2,17 @@ package com.statcon.de;
 
 import java.awt.AlphaComposite;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Point;
+import java.awt.Toolkit;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
 import java.util.Random;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -59,6 +63,7 @@ public class Game extends JPanel {
 								// kontrollieren
 
 	private Keyboard keyboard;
+	public Dimension screenRes;
 	
 	private enum state {
 		menu, game, highscore
@@ -87,13 +92,10 @@ public class Game extends JPanel {
 	 */
 	public void initializate() {
 		// log.info("Mit Wiimote verbinden");
-		// log.info("Name auf <player> setzen, Punkte auf 0, streak auf 0");
-		// log.info("Menü zeichnen");
-		// Hier eigentlich auf Mausklick reagiert:
-		// log.info("Start geklickt!");
-		// log.info("Gamestat auf game setzen.");
 
-		keyboard = new Keyboard();
+		Toolkit tk = Toolkit.getDefaultToolkit();
+		screenRes = tk.getScreenSize();
+		keyboard = new Keyboard(screenRes);
 
 		// nextGameState();
 
@@ -118,7 +120,9 @@ public class Game extends JPanel {
 						name = name.concat(message);
 					}
 				} else {
-					nextGameState();
+					if(e.getButton() == MouseEvent.BUTTON3){
+						nextGameState();						
+					}
 				}
 			};
 		});
@@ -238,30 +242,30 @@ public class Game extends JPanel {
 		Random gen = new Random();
 		switch (objs.size()) {
 		case 0:
-			objs.add(new Destructable());
+			objs.add(new Destructable(screenRes));
 		case 1:
 			if (gen.nextInt(6) == 0) {
-				objs.add(new Destructable());
+				objs.add(new Destructable(screenRes));
 			}
 			;
 		case 2:
 			if (gen.nextInt(5) == 0) {
-				objs.add(new Destructable());
+				objs.add(new Destructable(screenRes));
 			}
 			;
 		case 3:
 			if (gen.nextInt(4) == 0) {
-				objs.add(new Destructable());
+				objs.add(new Destructable(screenRes));
 			}
 			;
 		case 4:
 			if (gen.nextInt(3) == 0) {
-				objs.add(new Destructable());
+				objs.add(new Destructable(screenRes));
 			}
 			;
 		case 5:
 			if (gen.nextInt(2) == 0) {
-				objs.add(new Destructable());
+				objs.add(new Destructable(screenRes));
 			}
 			;
 		default:
@@ -273,12 +277,13 @@ public class Game extends JPanel {
 	 * Paint-Methode für die Spiel Klasse
 	 */
 	public void paint(Graphics g) {
+		
 		Graphics2D g2d = (Graphics2D) g;
 		
-		Image background = new ImageIcon(this.getClass().getResource(
+		Image background = new ImageIcon(this.getClass().getResource( // Hintergrund wird immer gezeichnet
 				"/images/background_01.png")).getImage();
-		g.drawImage(background, 0, 0, null); // Hintergrund
-
+		g2d.drawImage(background, 0, 0, (int)screenRes.getWidth(), (int)screenRes.getHeight(), null); 
+//TODO: Hintergrund in verschiedenen auflösungen zur Verfügung stellen
 		
 		if (gameState == state.game) { // Spiel-Modus
 		
@@ -292,45 +297,72 @@ public class Game extends JPanel {
 					g2d.setComposite(AlphaComposite.getInstance(
 							AlphaComposite.SRC_OVER, 0.1f)); // Transparent
 				}
-				g2d.fill(new RoundRectangle2D.Double(Settings.SCREEN_SIZE
-						.getWidth() - i * 45, 60, 30, 60, 10, 10));
-				g2d.fillArc((int) Settings.SCREEN_SIZE.getWidth() - i * 45, 30,
+				g2d.fill(new RoundRectangle2D.Double(screenRes.getWidth() - i * 45, 60, 30, 60, 10, 10));
+				g2d.fillArc((int) screenRes.getWidth() - i * 45, 30,
 						30, 50, 0, 180);
 			}
 
 			// Score
-			g2d.setComposite(AlphaComposite.getInstance(
-					AlphaComposite.SRC_OVER, 0.5f)); // Ziele nicht mehr
-														// transparent
+			g2d.setComposite(AlphaComposite.getInstance( AlphaComposite.SRC_OVER, 0.5f)); 
 			g.setFont(new Font("Arial Black", Font.BOLD, 30));
 			g.setColor(Color.white);
 			g.drawString("Score: " + score, 20, 40);
 
 			g2d.setComposite(AlphaComposite.getInstance(
-					AlphaComposite.SRC_OVER, 1.0f)); // Ziele nicht mehr
-														// transparent
+					AlphaComposite.SRC_OVER, 1.0f)); 
 
 			// Ziele
 			for (Destructable i : objs) {
 				i.render(g2d);
 			}
 
-		} else if (gameState == state.menu) { // Menü zeichnen
-			g2d.setComposite(AlphaComposite.getInstance(
-					AlphaComposite.SRC_OVER, 0.5f)); // Ziele nicht mehr
-														// transparent
-			g.setFont(new Font("Arial Black", Font.BOLD, 30));
-			g.setColor(Color.white);
-			g.drawString("Player: " + name, 20, 80);
-			
-			keyboard.render(g2d);
-		} else { // Highscores
-			g2d.setComposite(AlphaComposite.getInstance(
-					AlphaComposite.SRC_OVER, 0.5f)); // Ziele nicht mehr
-														// transparent
+			// Rest Zeit anzeigen
+			int timeLeft = (int)(Settings.ROUND_TIME_MS - (System.currentTimeMillis() - roundStart));
+			FontMetrics fm = g.getFontMetrics();
+			String timeLeftString = ""+timeLeft;
+			try{
+				timeLeftString = timeLeftString.substring(0, timeLeftString.length()-3)+ ":" + timeLeftString.substring(timeLeftString.length()-3, timeLeftString.length());
+			} catch (StringIndexOutOfBoundsException e) {
+				// Passiert halt, wenn die zeit zu klein wird. Dann kann man den String nicht mehr splitten.
+			}
+			Rectangle2D r = fm.getStringBounds(timeLeftString, g);
 			g.setFont(new Font("Arial Black", Font.BOLD, 50));
-			g.setColor(Color.white);
-			g.drawString("Your Score is: " + score, 400, 300);
+			if(timeLeft >= 5000) {
+				g.setColor(Color.white);
+			} else if (timeLeft < 5000 & timeLeft > 3000) {
+				g.setColor(Color.yellow);
+			} else {
+				g.setColor(Color.red);
+			}
+			g.drawString(timeLeftString, (int) (screenRes.width/2 - r.getWidth()/2), 40);
+			
+		} else if (gameState == state.menu) { // Menü zeichnen
+
+			keyboard.render(g);
+
+			// Spieler Namen zeichnen
+			g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.7f));
+			g.setFont(new Font("Arial Black", Font.BOLD, 100));
+			g.setColor(Color.black);
+			FontMetrics fm = g.getFontMetrics();	    
+			Rectangle2D r = fm.getStringBounds(name, g);
+			g.drawString(name, (int) (screenRes.width/2 - r.getWidth()/2), screenRes.height/2-50);
+			g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f));
+
+		} else { // Highscores
+			g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.8f));
+			g.setFont(new Font("Arial Black", Font.BOLD, 50));
+			g.setColor(Color.black);
+			String highscore_msg = "Your score is " + score + "," + System.getProperty("line.separator") + name + "!"; 
+			FontMetrics fm = g.getFontMetrics();
+			Rectangle2D r = fm.getStringBounds(highscore_msg, g);
+			g.drawString(highscore_msg, (int) (screenRes.width/2 - r.getWidth()/2), screenRes.height/2-50);
+			
+			g.setFont(new Font("Arial Black", Font.BOLD, 30));
+			g.setColor(Color.gray);
+			String proceed = "Right-Click to proceed!";
+			g.drawString(proceed, (int) (screenRes.width - 400), screenRes.height-20);
+			g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f));
 		}
 	}
 }

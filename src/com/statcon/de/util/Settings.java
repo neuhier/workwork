@@ -12,6 +12,4 @@ public class Settings {
 	public static final Dimension SMALL_TARGET = new Dimension(64, 64);
 	public static final Dimension MEDIUM_TARGET = new Dimension(124, 124);
 	public static final Dimension BIG_TARGET = new Dimension(196, 196);
-	
-	public static final Dimension SCREEN_SIZE = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
 }
