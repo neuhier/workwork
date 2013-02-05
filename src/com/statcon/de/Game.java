@@ -235,6 +235,9 @@ public class Game extends JPanel {
 					return(r1.score-r2.score);
 				}
 			});
+			if(results.size() > 10) { // Nur die Top 10 abspeichern
+				results.remove(10);
+			}
 			gameState = state.highscore;
 		} else {
 			name = Settings.DEFAULT_PLAYER_NAME;
@@ -382,8 +385,8 @@ public class Game extends JPanel {
 			int xpos = (int) (screenRes.getWidth()/2 - 200);
 			int ybase = screenRes.height/2;
 					
-			int max = Math.min(results.size(), Settings.MAX_NUMBER_IN_HIGHSCORES)-1;
-			for(int i = max; i > 1; i--) {
+			int max = Math.min(results.size(), Settings.MAX_NUMBER_IN_HIGHSCORES);
+			for(int i = max-1; i > 0; i--) {
 				results.get(i).render(g2d, xpos, ybase + (int)50*(max-i), 100, 100);
 				}
 			}			

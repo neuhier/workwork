@@ -1,5 +1,6 @@
 package com.statcon.de.util;
 
+import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.util.Calendar;
@@ -21,7 +22,8 @@ public class GameResult{
 	 * Darstellung der Spielergebnisse in einer Highscoreliste.
 	 */
 	public void render(Graphics2D g, int x, int y, int width, int height) {
-		g.setColor(Color.white);
+		g.setColor(Color.black);
+		g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.55f)); 
 		String message = score + " - " + name + " - " + date;
 		g.drawString(message, x, y);
 	}
