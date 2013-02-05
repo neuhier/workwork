@@ -30,10 +30,7 @@ import com.statcon.de.util.SoundEffectPlayer;
  *
  * - Einschussöcher beim Schießen
  * - Vernünftige Bewegung der Zielscheiben
- * - Musik + Soundeffekte
- * - Menü: Geschlecht wählen, Namen eingeben, Start-Knopf
  * - Highscore: Liste mit den Top x anzeigen
- * - Mundition: Nachladen nach 6 Schüssen mit Rechtsklick
  * 
  */
 
@@ -111,7 +108,11 @@ public class Game extends JPanel {
 				} else if (gameState == state.menu) {
 					String message = keyboard.hit(e.getPoint());
 					if(message == "<-") {
+						try{
 						name = name.substring(0, name.length()-1);
+						} catch(StringIndexOutOfBoundsException ex) {
+							// Man kann halt nix mehr löschen, wenn schon alles vom Namen gelöscht wurde.
+						}
 					} else if(message == "Play") {
 						nextGameState();
 					} else if (message== "Male" || message == "NA" || message == "Female") {
@@ -319,11 +320,11 @@ public class Game extends JPanel {
 			// Rest Zeit anzeigen
 			int timeLeft = (int)(Settings.ROUND_TIME_MS - (System.currentTimeMillis() - roundStart));
 			FontMetrics fm = g.getFontMetrics();
-			String timeLeftString = ""+timeLeft;
+			String timeLeftString = ""+timeLeft; // Verbleibende Zeit in der Form: "10:334" anzeigen. Wobei am Anfang die Sekunden stehen, dahinter die Millisekunden
 			try{
 				timeLeftString = timeLeftString.substring(0, timeLeftString.length()-3)+ ":" + timeLeftString.substring(timeLeftString.length()-3, timeLeftString.length());
 			} catch (StringIndexOutOfBoundsException e) {
-				// Passiert halt, wenn die zeit zu klein wird. Dann kann man den String nicht mehr splitten.
+				// Passiert halt, wenn die Zeit zu klein wird. Dann kann man den String nicht mehr splitten.
 			}
 			Rectangle2D r = fm.getStringBounds(timeLeftString, g);
 			g.setFont(new Font("Arial Black", Font.BOLD, 50));
@@ -338,14 +339,14 @@ public class Game extends JPanel {
 			
 		} else if (gameState == state.menu) { // Menü zeichnen
 
-			keyboard.render(g);
+			keyboard.render(g2d);
 
-			// Spieler Namen zeichnen
+			// Spieler Namen zeichnen (zentriert)
 			g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.7f));
 			g.setFont(new Font("Arial Black", Font.BOLD, 100));
 			g.setColor(Color.black);
-			FontMetrics fm = g.getFontMetrics();	    
-			Rectangle2D r = fm.getStringBounds(name, g);
+			FontMetrics fm = g.getFontMetrics(); // Wie lang ist der Name?  
+			Rectangle2D r = fm.getStringBounds(name, g); // WIe lang ist der Name?
 			g.drawString(name, (int) (screenRes.width/2 - r.getWidth()/2), screenRes.height/2-50);
 			g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f));
 
@@ -357,7 +358,7 @@ public class Game extends JPanel {
 			FontMetrics fm = g.getFontMetrics();
 			Rectangle2D r = fm.getStringBounds(highscore_msg, g);
 			g.drawString(highscore_msg, (int) (screenRes.width/2 - r.getWidth()/2), screenRes.height/2-50);
-			
+			// Weiter mit Rechtsklick!
 			g.setFont(new Font("Arial Black", Font.BOLD, 30));
 			g.setColor(Color.gray);
 			String proceed = "Right-Click to proceed!";

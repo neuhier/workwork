@@ -1,7 +1,7 @@
 package com.statcon.de.menu;
 
 import java.awt.Dimension;
-import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.util.ArrayList;
@@ -69,7 +69,7 @@ public class Keyboard {
 	/**
 	 * Render all keyboard buttons.
 	 */
-	public void render(Graphics g) {
+	public void render(Graphics2D g) {
 		for(MenuButton i:keys){
 			i.render(g);
 		}
