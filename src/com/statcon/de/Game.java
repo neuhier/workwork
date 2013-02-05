@@ -101,6 +101,7 @@ public class Game extends JPanel {
 		keyboard = new Keyboard(screenRes);
 
 		results = new ArrayList<GameResult>();
+		results.add(new GameResult("", "", 0)); // Leerer eintrag
 		
 		this.addMouseListener(new MouseAdapter() { // Mausklicks registrieren
 			public void mousePressed(MouseEvent e) {
@@ -236,7 +237,7 @@ public class Game extends JPanel {
 				}
 			});
 			if(results.size() > 10) { // Nur die Top 10 abspeichern
-				results.remove(10);
+				results.remove(0);
 			}
 			gameState = state.highscore;
 		} else {
@@ -303,9 +304,8 @@ public class Game extends JPanel {
 		
 		if (gameState == state.game) { // Spiel-Modus
 		
-			g2d.setComposite(AlphaComposite.getInstance(
-					AlphaComposite.SRC_OVER, 0.5f)); // Ziele nicht mehr
-														// transparent
+			g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f));
+			
 			// Bullets
 			g2d.setPaint(Color.white);
 			for (int i = 1; i <= 6; i++) {
@@ -318,15 +318,18 @@ public class Game extends JPanel {
 						30, 50, 0, 180);
 			}
 
-			// Score
-			g2d.setComposite(AlphaComposite.getInstance( AlphaComposite.SRC_OVER, 0.5f)); 
+			// Score & Name & Highscore
+			g2d.setComposite(AlphaComposite.getInstance( AlphaComposite.SRC_OVER, 0.75f)); 
 			g.setFont(new Font("Arial Black", Font.BOLD, 30));
 			g.setColor(Color.white);
-			g.drawString("Score: " + score, 20, 40);
+			g.drawString("Player: " + name, 20, 40);
+			g.drawString("Score: " + score, 20, 80);
+			g.drawString("Highscore: " + results.get(results.size()-1).score + "(" + results.get(results.size()-1).name + ")", 20, 120);
+			
+			
+			g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f)); 
 
-			g2d.setComposite(AlphaComposite.getInstance(
-					AlphaComposite.SRC_OVER, 1.0f)); 
-
+			
 			// Ziele
 			for (Destructable i : objs) {
 				i.render(g2d);
