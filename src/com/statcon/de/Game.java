@@ -14,6 +14,9 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Random;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -21,6 +24,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 
 import com.statcon.de.menu.Keyboard;
+import com.statcon.de.util.GameResult;
 import com.statcon.de.util.Settings;
 import com.statcon.de.util.SoundEffectPlayer;
 
@@ -52,8 +56,10 @@ public class Game extends JPanel {
 	private int kills = 0; // Wie viele Kills
 	private int streak = 0; // Wie viele Kills am Stück
 	private int score = 0; // Punkte in diesem Spiel
-	private String name = Settings.DEFAULT_PLAYER_NAME; // Name des Spielers für
-														// den Highscore
+	private String name = Settings.DEFAULT_PLAYER_NAME; // Name des Spielers für Highscore
+	public ArrayList<GameResult> results; // Liste mit allen bisherigen Ergebnissen
+	
+	
 	private String gender = "NA";
 	private long roundStart = 0; // Zeitpunkt an dem eine Spielrunde startet
 	private long paintStamp; // Zeitzähler um die anzahl der Frames / Sekunde zu
@@ -94,8 +100,8 @@ public class Game extends JPanel {
 		screenRes = tk.getScreenSize();
 		keyboard = new Keyboard(screenRes);
 
-		// nextGameState();
-
+		results = new ArrayList<GameResult>();
+		
 		this.addMouseListener(new MouseAdapter() { // Mausklicks registrieren
 			public void mousePressed(MouseEvent e) {
 				if(gameState == state.game) {
@@ -223,6 +229,12 @@ public class Game extends JPanel {
 			roundStart = System.currentTimeMillis(); // Zeitpunkt, wann die
 														// Runde beginnt
 		} else if (gameState == state.game) {
+			results.add(new GameResult(name, gender, score)); // Neues Ergebniss in die Liste eintragen.
+			Collections.sort(results, new Comparator<GameResult>(){ // Sortieren
+				public int compare(GameResult r1, GameResult r2) {
+					return(r1.score-r2.score);
+				}
+			});
 			gameState = state.highscore;
 		} else {
 			name = Settings.DEFAULT_PLAYER_NAME;
@@ -350,7 +362,7 @@ public class Game extends JPanel {
 			g.drawString(name, (int) (screenRes.width/2 - r.getWidth()/2), screenRes.height/2-50);
 			g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f));
 
-		} else { // Highscores
+		} else if(gameState == state.highscore) { // Highscores
 			g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.8f));
 			g.setFont(new Font("Arial Black", Font.BOLD, 50));
 			g.setColor(Color.black);
@@ -364,6 +376,17 @@ public class Game extends JPanel {
 			String proceed = "Right-Click to proceed!";
 			g.drawString(proceed, (int) (screenRes.width - 400), screenRes.height-20);
 			g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f));
+			
+			// Highscores anzeigen
+			if(results.size() > 0) { // erst wenn auch ein paar in der Liste sind.
+			int xpos = (int) (screenRes.getWidth()/2 - 200);
+			int ybase = screenRes.height/2;
+					
+			int max = Math.min(results.size(), Settings.MAX_NUMBER_IN_HIGHSCORES)-1;
+			for(int i = max; i > 1; i--) {
+				results.get(i).render(g2d, xpos, ybase + (int)50*(max-i), 100, 100);
+				}
+			}			
 		}
 	}
 }
