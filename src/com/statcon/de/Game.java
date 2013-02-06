@@ -31,10 +31,12 @@ import com.statcon.de.util.SoundEffectPlayer;
 /*
  * 
  * TODOS:
- *
+ * 
+ * - Verschieden viele Punkte für die Zielscheiben verschiedener Größen
+ * - Mehrere Levels? -> Mehr Bewegung im zweiten level!
+ * - Auswewrtung am Ende: %Treffer, #Schüsse, Schussfrequenz, Grafik mit der Bewegung des Fadenkreuzes(?)
  * - Einschussöcher beim Schießen
  * - Vernünftige Bewegung der Zielscheiben
- * - Highscore: Liste mit den Top x anzeigen
  * 
  */
 
