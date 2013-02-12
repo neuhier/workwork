@@ -67,6 +67,7 @@ public class Game extends JPanel {
 	private long paintStamp; // Zeitzähler um die anzahl der Frames / Sekunde zu
 								// kontrollieren
 
+	private Cursor crosshairs;
 	private Keyboard keyboard;
 	public Dimension screenRes;
 	
@@ -99,7 +100,10 @@ public class Game extends JPanel {
 	 * Spiel starten.
 	 */
 	public void initializate() {
-		// log.info("Mit Wiimote verbinden");
+
+		crosshairs = new Cursor();
+
+		// WiiMote
 
 		Toolkit tk = Toolkit.getDefaultToolkit();
 		screenRes = tk.getScreenSize();
@@ -304,6 +308,8 @@ public class Game extends JPanel {
 		// Hintergrund immer malen
 		g2d.drawImage(background, 0, 0, (int)screenRes.getWidth(), (int)screenRes.getHeight(), null); 
 		//TODO: Hintergrund in verschiedenen auflösungen zur Verfügung stellen
+		
+		crosshairs.render(g2d);
 		
 		if (gameState == state.game) { // Spiel-Modus
 		

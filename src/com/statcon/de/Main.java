@@ -10,7 +10,7 @@ import javax.swing.JFrame;
  * @author Basti Hoffmeister
  * 
  */
-public class Main {
+public class Main{
 
 	public static void main(String[] args) {
 
@@ -21,14 +21,14 @@ public class Main {
 		Game game = new Game();
 		frame.add(game);
 		frame.pack();
-		
-		GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-	    GraphicsDevice device = ge.getDefaultScreenDevice();
+
+		GraphicsEnvironment ge = GraphicsEnvironment
+				.getLocalGraphicsEnvironment();
+		GraphicsDevice device = ge.getDefaultScreenDevice();
 		device.setFullScreenWindow(frame);
-		
+
 		frame.setVisible(true);
-
+		
 		game.initializate();
-
 	}
 }
