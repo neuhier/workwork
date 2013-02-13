@@ -67,7 +67,6 @@ public class Game extends JPanel {
 	private long paintStamp; // Zeitzähler um die anzahl der Frames / Sekunde zu
 								// kontrollieren
 
-	private Cursor crosshairs;
 	private Keyboard keyboard;
 	public Dimension screenRes;
 	
@@ -101,7 +100,6 @@ public class Game extends JPanel {
 	 */
 	public void initializate() {
 
-		crosshairs = new Cursor();
 
 		// WiiMote
 
@@ -165,17 +163,21 @@ public class Game extends JPanel {
 	synchronized void hit(Point p) {
 		if (bullets >= 1) {
 			bullets--;
+			int thiskill = 0; // Punkte für diesen Treffer
 			boolean anyHit = false;
 			for (Destructable i : objs) {
-				if (i.hit(p)) { // Wenn ein existierendes Objekt getroffen wurde
+				thiskill = i.hit(p);
+				if (thiskill > 0) { // Wenn ein existierendes Objekt getroffen wurde
 					anyHit = true;
+					break;
 				}
 			}
 			if (anyHit) { // Treffer
 				SoundEffectPlayer.hitSound();
 				kills++;
 				streak++;
-				score = score + 10 * streak * streak;
+				
+				score = score + thiskill * streak * streak;
 			} else { // Fehlschuss
 				SoundEffectPlayer.failSound();
 				streak = 0;
@@ -308,8 +310,7 @@ public class Game extends JPanel {
 		// Hintergrund immer malen
 		g2d.drawImage(background, 0, 0, (int)screenRes.getWidth(), (int)screenRes.getHeight(), null); 
 		//TODO: Hintergrund in verschiedenen auflösungen zur Verfügung stellen
-		
-		crosshairs.render(g2d);
+
 		
 		if (gameState == state.game) { // Spiel-Modus
 		

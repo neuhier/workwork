@@ -15,7 +15,7 @@ public class GameResult{
 		gender = g;
 		score=s;
 		Calendar today = Calendar.getInstance();
-		date = today.get(Calendar.DAY_OF_MONTH) + "." + today.get(Calendar.MONTH) + "." + today.get(Calendar.YEAR);
+		date = today.get(Calendar.DAY_OF_MONTH) + "." + (today.get(Calendar.MONTH)+1) + "." + today.get(Calendar.YEAR);
 	}
 	
 	/**
