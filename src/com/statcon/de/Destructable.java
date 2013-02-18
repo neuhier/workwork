@@ -123,7 +123,7 @@ public class Destructable {
 	 * @return 0 - daneben geschossen, oder die in den Settings.java hinterlegten Punkte für kleine/mittlere/große Ziele
 	 */
 	public int hit(Point p) {
-		if(hitbox.contains(p)){
+		if(currImg == -1 && hitbox.contains(p)){
 			currImg = 0;
 			switch(size) {
 			case 0: return Settings.SCORE_SMALL_TARGET;
