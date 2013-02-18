@@ -61,7 +61,7 @@ public class Game extends JPanel {
 	private String name = Settings.DEFAULT_PLAYER_NAME; // Name des Spielers für Highscore
 	public ArrayList<GameResult> results; // Liste mit allen bisherigen Ergebnissen
 	
-	
+	private boolean initialized = false;
 	private String gender = "NA";
 	private long roundStart = 0; // Zeitpunkt an dem eine Spielrunde startet
 	private long paintStamp; // Zeitzähler um die anzahl der Frames / Sekunde zu
@@ -142,6 +142,8 @@ public class Game extends JPanel {
 			};
 		});
 
+		initialized = true;
+		
 		paintStamp = System.currentTimeMillis();
 		while (true) {
 			render();
@@ -304,6 +306,8 @@ public class Game extends JPanel {
 	 * Paint-Methode für die Spiel Klasse
 	 */
 	public void paint(Graphics g) {
+		
+		if (!initialized) return;
 		
 		Graphics2D g2d = (Graphics2D) g;
 		
